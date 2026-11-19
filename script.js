@@ -35,10 +35,10 @@ function handleRangeUpdate() {
 }
 
 // Progress bar update
+// Progress bar update
 function handleProgress() {
-  const percent = video.duration ? (video.currentTime / video.duration) * 100 : 0;
-  progressBar.style.flexBasis = percent + '%';
-  progressBar.style.width = percent + '%';
+  const percent = (video.currentTime / video.duration) * 100 || 0;
+  progressBar.style.flexBasis = `${percent}%`;
 }
 
 // Progress bar par click/drag karke jump
@@ -66,6 +66,8 @@ video.addEventListener('play', updateButton);
 video.addEventListener('pause', updateButton);
 video.addEventListener('timeupdate', handleProgress);
 video.addEventListener('error', showError);
+video.addEventListener('loadedmetadata', handleProgress);
+video.addEventListener('seeked', handleProgress);
 
 toggle.addEventListener('click', togglePlay);
 skipButtons.forEach(button => button.addEventListener('click', skip));
