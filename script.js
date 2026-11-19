@@ -9,19 +9,14 @@ const ranges = player.querySelectorAll('.player__slider');
 
 // Play / Pause
 function togglePlay() {
-  if (video.paused) {
-    const playPromise = video.play();
-    if (playPromise) {
-      playPromise.catch(() => showError());
-    }
-  } else {
-    video.pause();
-  }
+  const method = video.paused ? 'play' : 'pause';
+  video[method]();
 }
 
 // Button icon update
 function updateButton() {
-  toggle.textContent = video.paused ? '►' : '❚ ❚';
+  const icon = video.paused ? '►' : '❚ ❚';
+  toggle.textContent = icon;
 }
 
 // « 10s aur 25s »
@@ -31,54 +26,45 @@ function skip() {
 
 // Volume aur playback speed
 function handleRangeUpdate() {
-  video[this.name] = parseFloat(this.value);
+  video[this.name] = this.value;
 }
 
-// Progress bar update
-// Progress bar update
+// Progress bar: video ke current time ke hisaab se update
 function handleProgress() {
-  const percent = (video.currentTime / video.duration) * 100 || 0;
+  const percent = (video.currentTime / video.duration) * 100;
   progressBar.style.flexBasis = `${percent}%`;
 }
 
-// Progress bar par click/drag karke jump
+// Progress bar par click/drag karke video aage-peeche
 function scrub(e) {
-  if (!video.duration) return;
-  video.currentTime = (e.offsetX / progress.offsetWidth) * video.duration;
+  const scrubTime = (e.offsetX / progress.offsetWidth) * video.duration;
+  video.currentTime = scrubTime;
 }
 
 // Video load fail hone par error message
-function showError() {
-  if (player.querySelector('.player__error')) return;
+function handleError() {
   const msg = document.createElement('p');
-  msg.className = 'player__error';
   msg.textContent = 'Sorry, the video failed to load.';
   msg.style.color = 'white';
   msg.style.fontSize = '16px';
   msg.style.textAlign = 'center';
-  msg.style.padding = '10px';
   player.appendChild(msg);
 }
 
-// Events
+// Event listeners
 video.addEventListener('click', togglePlay);
 video.addEventListener('play', updateButton);
 video.addEventListener('pause', updateButton);
-video.addEventListener('timeupdate', handleProgress);
-video.addEventListener('error', showError);
-video.addEventListener('loadedmetadata', handleProgress);
-video.addEventListener('seeked', handleProgress);
+video.addEventListener('timeupdate', handleProgress); // video chalte waqt progress bar update
+video.addEventListener('error', handleError);
 
 toggle.addEventListener('click', togglePlay);
 skipButtons.forEach(button => button.addEventListener('click', skip));
 ranges.forEach(range => range.addEventListener('change', handleRangeUpdate));
-ranges.forEach(range => range.addEventListener('input', handleRangeUpdate));
+ranges.forEach(range => range.addEventListener('mousemove', handleRangeUpdate));
 
 let mousedown = false;
 progress.addEventListener('click', scrub);
-progress.addEventListener('mousemove', e => mousedown && scrub(e));
+progress.addEventListener('mousemove', (e) => mousedown && scrub(e));
 progress.addEventListener('mousedown', () => (mousedown = true));
 progress.addEventListener('mouseup', () => (mousedown = false));
-
-// Shuru mein progress bar 0% par
-handleProgress();
